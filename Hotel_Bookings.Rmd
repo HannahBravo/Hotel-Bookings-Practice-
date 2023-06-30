@@ -1,0 +1,180 @@
+---
+title: "Sandbox Activity"
+output:
+  html_document: default
+  pdf_document: default
+date: "2023-06-23"
+---
+
+## Background for this activity
+
+In this activity, you'll review a scenario, and focus on cleaning real data in R. 
+You will learn more about data cleaning functions and perform basic calculations 
+to gain initial insights into your data.
+
+Throughout this activity, you will also have the opportunity to practice writing 
+your own code by making changes to the code chunks yourself. If you encounter an 
+error or get stuck, you can always check the Lesson2_Clean_Solutions .rmd file in 
+the Solutions folder under Week 3 for the complete, correct code. 
+
+## The scenario
+
+In this scenario, you are a junior data analyst working for a hotel booking company. 
+You have been asked to clean a .csv file that was created after querying a database 
+to combine two different tables from different hotels. In order to learn more about 
+this data, you are going to need to use functions to preview the data's structure, 
+including its columns and rows. You will also need to use basic cleaning functions 
+to prepare this data for analysis.  
+
+## Step 1: Load packages
+
+I'm not 100% sure if I've installed skimr and janitor yet, so let's do that in the 
+console.  I'll then call those packages and tidyverse to the library in the console
+as well.
+
+Cool, now let's move onto the next step.
+
+## Step 2: Import data
+
+The data you have been asked to clean is currently an external .csv file. In order to view and clean it in `R`, you will need to import it. The `tidyverse` library `readr` package has a number of functions for "reading in" or importing data, including .csv files. 
+
+In the chunk below, you will use the `read_csv()` function to import data from a .csv file in the project folder called "hotel_bookings.csv" and save it as a data frame called `bookings_df`:
+
+```{r}
+library(tidyverse)
+library(skimr)
+library(ggplot2)
+bookings_df <- read_csv(file="/Users/hannahbdr/Desktop/DataAnalysis/R /Google Cert/hotel_bookings.csv")
+```
+
+Weird, there were a couple of arguments in The Book of R that were listed to pass,
+but when i tried to pass them, R kicked back an error.  The arguments were: 
+- header = TRUE
+- stringsAsFactors = FALSE
+
+## Step 3: Getting to know your data
+
+Before you start cleaning your data, take some time to explore it. You can use several functions that you are already familiar with to preview your data, including the `head()` function in the code chunk below:
+```{r}
+head(bookings_df, 10)
+tail(bookings_df, 5)
+```
+```{r}
+colnames(bookings_df)
+str(bookings_df)
+```
+
+Some packages contain more advanced functions for summarizing and exploring your data. One example is the `skimr` package, which has a number of functions for this purpose. For example, the `skim_without_charts()` function provides a detailed summary of the data. Try running the code below:
+```{r}
+skim_without_charts(bookings_df)
+```
+
+## Step 4: Cleaning your data
+
+Based on the functions you have used so far, how would you describe your data in a brief to your stakeholder? Now, let's say you are primarily interested in the following variables: 'hotel', 'is_canceled', and 'lead_time'. Create a new data frame with just those columns, calling it `trimmed_df` by adding the variable names to this code chunk:
+
+Honestly, I'm too sure how I would summarize the data so far to the stakeholder.  
+Maybe something like" We have a dataset of 32 columns/variables and 119390 observations.
+The varaibles track the hotel type, arrival date, number of guests, number of nights stayed,
+cancellations, travel angent info, returning guest, etc. from the year 2014 - 2017. There is almost no missing data, just a few instances of info about children. 
+```{r}
+trimmed_df <- bookings_df %>% select("hotel_type"="hotel", "is_canceled", "lead_time")
+date_df <- bookings_df %>% 
+  select(arrival_date_year, arrival_date_month) %>% 
+  unite(arrival_month_year, c("arrival_date_month", "arrival_date_year"), sep=" ")
+head(trimmed_df)
+head(date_df)
+```
+
+Another common task is to either split or combine data in different columns. In this example, you can combine the arrival month and year into one column using the unite() function: (We're not going to use unite(), but instead paste().)
+
+Sike! paste() is used exclusively for concatenating strings together, whereas unite()
+is used for combining multiple columns (variables) together from a data frame
+
+## Step 5: Another way of doing things
+
+You can also use the`mutate()` function to make changes to your columns. Let's say you wanted to create a new column that summed up all the adults, children, and babies on a reservation for the total number of people. Modify the code chunk below to create that new column: 
+
+```{r}
+
+bookings_df %>% 
+  mutate(total_guests = adults + children + babies)
+tail(bookings_df)
+```
+
+The mutate() function will create new columns that are fxns of existing variables.
+Using mutate() we can name the new object, and set it equal to the operation that we'll be 
+performing on the existing variables.  
+
+Additionally, we don't need to use the sum() fxn to add multiple numeric columns together.
+We can just literally add the columns together using the '+' operator and the column names.
+
+## Step 6: Calculating Summary Statistics
+
+Cool, now lets calculate the summary statistics!  Let's calculate the total # of cancelled 
+bookings and the average lead time for bookings.  
+```{r}
+sum(bookings_df$is_canceled)
+mean(bookings_df$lead_time)
+(sum(bookings_df$is_canceled)/119390)*100
+```
+
+Wow, 37% of all bookings were cancellations, that seems pretty high. 
+
+We're picking back up on this activity for the Google Cert Program.  We 're going to arrange 
+the data based on the lead time, is descending order, so that the largest lead time is 
+at the top, and the least lead time is at the bottom.
+```{r}
+bookings_df2 <- arrange(bookings_df, desc(bookings_df$lead_time))
+bookings_df2
+```
+
+Now that we have a new version of the data frame arranged by lead time in largest to smallest,
+let's look at the max and min lead time for the hotel(s)
+```{r}
+max(bookings_df2$lead_time)
+min(bookings_df2$lead_time)
+mean(bookings_df2$lead_time)
+```
+
+Now, we want to find the average, min, and max lead time for city hotels specifically. So let's filter the 
+data, assign it an object, then run the summary statistics.  
+```{r}
+bookings_city <- filter(bookings_df2, bookings_df2$hotel == "City Hotel")
+bookings_city
+```
+
+Let's find out what the average lead time is for city hotels. 
+```{r}
+mean(bookings_city$lead_time)
+```
+
+Now, we need to supply loads more data about city hotels, but rather than running each line of code 
+over and over again, we're going to capitalize on object oriented bx of R!
+```{r}
+bookings_summary <-
+  bookings_df2 %>% 
+  group_by(bookings_df2$hotel) %>% 
+summarise(avg_lead_time = mean(bookings_df2$ lead_time), 
+          min_lead_time = min(bookings_df2$lead_time), 
+                              max_lead_time = max(bookings_df2$lead_time)) 
+bookings_summary
+  
+```
+
+## Step 7: Creating a Plot
+
+Let's create a visual to see who books reservations in advance.
+```{r}
+ggplot(data= bookings_df) + geom_point(mapping = aes(x= bookings_df$lead_time, y= bookings_df$children))
+```
+
+There was a hypothesis that those who book in advance probably have children, but looking at the plot, it doesn't seem that that's the case.  
+
+Let's see if those who book stays on the weekends tend to have children.
+```{r}
+ggplot(data= bookings_df) + geom_point(mapping = aes(x= bookings_df$stays_in_weekend_nights, y= bookings_df$children))
+```
+
+Hmm, I'm not 100% but it looks like that isn't the case either.  The points don't seem to be as clustered
+together as the last plot, but the trend looks the same in terms of the distribution of them.  
