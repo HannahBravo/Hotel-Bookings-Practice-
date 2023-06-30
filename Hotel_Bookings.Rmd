@@ -1,5 +1,5 @@
 ---
-title: "Sandbox Activity"
+title: "Hotel Bookings"
 output:
   html_document: default
   pdf_document: default
@@ -73,7 +73,7 @@ skim_without_charts(bookings_df)
 
 Based on the functions you have used so far, how would you describe your data in a brief to your stakeholder? Now, let's say you are primarily interested in the following variables: 'hotel', 'is_canceled', and 'lead_time'. Create a new data frame with just those columns, calling it `trimmed_df` by adding the variable names to this code chunk:
 
-Honestly, I'm too sure how I would summarize the data so far to the stakeholder.  
+Honestly, I'm not too sure how I would summarize the data so far to the stakeholder.  
 Maybe something like" We have a dataset of 32 columns/variables and 119390 observations.
 The varaibles track the hotel type, arrival date, number of guests, number of nights stayed,
 cancellations, travel angent info, returning guest, etc. from the year 2014 - 2017. There is almost no missing data, just a few instances of info about children. 
